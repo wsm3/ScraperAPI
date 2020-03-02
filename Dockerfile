@@ -8,24 +8,7 @@ RUN apt-get update && apt-get install -y \
     xvfb
 
 
-# install geckodriver and firefox
-
-RUN GECKODRIVER_VERSION=`curl https://github.com/mozilla/geckodriver/releases/latest | grep -Po 'v[0-9]+.[0-9]+.[0-9]+'` && \
-    wget https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
-    tar -zxf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz -C /usr/local/bin && \
-    chmod +x /usr/local/bin/geckodriver && \
-    rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz
-
-RUN FIREFOX_SETUP=firefox-setup.tar.bz2 && \
-    apt-get purge firefox && \
-    wget -O $FIREFOX_SETUP "https://download.mozilla.org/?product=firefox-latest&os=linux64" && \
-    tar xjf $FIREFOX_SETUP -C /opt/ && \
-    ln -s /opt/firefox/firefox /usr/bin/firefox && \
-    rm $FIREFOX_SETUP
-
-
 # install chromedriver and google-chrome
-
 RUN CHROMEDRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` && \
     wget https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip -d /usr/bin && \
@@ -40,7 +23,6 @@ RUN CHROME_SETUP=google-chrome.deb && \
 
 
 # install phantomjs
-
 RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 && \
     tar -jxf phantomjs-2.1.1-linux-x86_64.tar.bz2 && \
     cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs && \
@@ -49,6 +31,8 @@ RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x
 
 RUN pip3 install selenium
 RUN pip3 install pyvirtualdisplay
+RUN pip3 install Flask
+RUN pip3 install -U gunicorn
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
@@ -59,5 +43,7 @@ WORKDIR /$APP_HOME
 
 COPY . $APP_HOME/
 
+EXPOSE 5056
+
 CMD tail -f /dev/null
-# CMD python3 example.py
+CMD python3 app.py
